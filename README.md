@@ -28,6 +28,8 @@ Most core features are already present:
 * Reading and writing app state (contact list, chat pin/mute status, etc)
 * Sending and handling retry receipts if message decryption fails
 * Sending status messages (experimental, may not work for large contact lists)
+* Sending interactive and buttons messages (unstable)
+* Custom pairing code 
 
 Things that are not yet implemented:
 
