@@ -19,6 +19,7 @@ import (
 	"go.mau.fi/libsignal/keys/prekey"
 	"go.mau.fi/libsignal/protocol"
 	"google.golang.org/protobuf/proto"
+	"go.mau.fi/whatsmeow/store/cache"
 
 	waBinary "go.mau.fi/whatsmeow/binary"
 	"go.mau.fi/whatsmeow/proto/waCommon"
@@ -36,6 +37,10 @@ const recentMessagesSize = 256
 type recentMessageKey struct {
 	To types.JID
 	ID types.MessageID
+}
+
+func (k recentMessageKey) String() string {
+	return k.To.String() + "_" + k.ID
 }
 
 type RecentMessage struct {
@@ -86,14 +91,36 @@ func (cli *Client) addRecentMessage(ctx context.Context, to types.JID, id types.
 	if cli.recentMessagesPtr >= len(cli.recentMessagesList) {
 		cli.recentMessagesPtr = 0
 	}
+	if cache.DefaultSentCache != nil && wa != nil {
+		err := cache.DefaultSentCache.Set(key.String(), wa)
+		if err != nil {
+			cli.Log.Errorf("failed to cache sent message: %v %v", key, err)
+		}
+	}
 	cli.recentMessagesLock.Unlock()
 	return nil
 }
 
 func (cli *Client) getRecentMessage(to types.JID, id types.MessageID) RecentMessage {
 	cli.recentMessagesLock.RLock()
+<<<<<<< HEAD
 	defer cli.recentMessagesLock.RUnlock()
 	return cli.recentMessagesMap[recentMessageKey{to, id}]
+=======
+	key := recentMessageKey{to, id}
+	msg, _ := cli.recentMessagesMap[key]
+	if cache.DefaultSentCache != nil && msg.wa == nil {
+		if m, err := cache.DefaultSentCache.Get(key.String()); err != nil {
+			cli.Log.Errorf("failed to get cached sent message: %s %v", key, err)
+		} else {
+			if m != nil {
+				msg.wa = m
+			}
+		}
+	}
+	cli.recentMessagesLock.RUnlock()
+	return msg
+>>>>>>> 7fe031b (feat: android)
 }
 
 func (cli *Client) getMessageForRetry(ctx context.Context, receipt *events.Receipt, messageID types.MessageID) (*RecentMessage, error) {
