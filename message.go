@@ -255,10 +255,8 @@ func (cli *Client) parseMessageInfo(node *waBinary.Node) (*types.MessageInfo, er
 }
 
 func (cli *Client) handlePlaintextMessage(ctx context.Context, info *types.MessageInfo, node *waBinary.Node) (handlerFailed bool) {
-	// TODO edits have an additional <meta msg_edit_t="1696321271735" original_msg_t="1696321248"/> node
 	plaintext, ok := node.GetOptionalChildByTag("plaintext")
 	if !ok {
-		// 3:
 		return
 	}
 	plaintextBody, ok := plaintext.Content.([]byte)
@@ -275,8 +273,9 @@ func (cli *Client) handlePlaintextMessage(ctx context.Context, info *types.Messa
 	}
 	cli.storeMessageSecret(ctx, info, &msg)
 	evt := &events.Message{
-		Info:       *info,
-		RawMessage: &msg,
+		Info:            *info,
+		RawMessage:      &msg,
+		AdditionalNodes: node.GetChildren(),
 	}
 	meta, ok := node.GetOptionalChildByTag("meta")
 	if ok {
@@ -287,6 +286,7 @@ func (cli *Client) handlePlaintextMessage(ctx context.Context, info *types.Messa
 	}
 	return cli.dispatchEvent(evt.UnwrapRaw())
 }
+
 
 func (cli *Client) migrateSessionStore(ctx context.Context, pn, lid types.JID) {
 	err := cli.Store.Sessions.MigratePNToLID(ctx, pn, lid)
@@ -421,7 +421,8 @@ func (cli *Client) decryptMessages(ctx context.Context, info *types.MessageInfo,
 				continue
 			}
 			protobufFailed = false
-			handlerFailed = cli.handleDecryptedMessage(ctx, info, &msg, retryCount)
+			handlerFailed = cli.handleDecryptedMessage(ctx, info, &msg, retryCount, node.GetChildren())
+
 		case 3:
 			handlerFailed, protobufFailed = cli.handleDecryptedArmadillo(ctx, info, decrypted, retryCount)
 		default:
@@ -1029,14 +1030,15 @@ func (cli *Client) storeHistoricalPNLIDMappings(ctx context.Context, mappings []
 	}
 }
 
-func (cli *Client) handleDecryptedMessage(ctx context.Context, info *types.MessageInfo, msg *waE2E.Message, retryCount int) (handlerFailed bool) {
+func (cli *Client) handleDecryptedMessage(ctx context.Context, info *types.MessageInfo, msg *waE2E.Message, retryCount int, nodes []waBinary.Node) bool {
 	ok := cli.processProtocolParts(ctx, info, msg)
 	if !ok {
 		return false
 	}
-	evt := &events.Message{Info: *info, RawMessage: msg, RetryCount: retryCount}
+	evt := &events.Message{Info: *info, RawMessage: msg, RetryCount: retryCount, AdditionalNodes: nodes}
 	return cli.dispatchEvent(evt.UnwrapRaw())
 }
+
 
 func (cli *Client) sendProtocolMessageReceipt(ctx context.Context, id types.MessageID, msgType types.ReceiptType) {
 	if len(id) == 0 {
