@@ -312,6 +312,9 @@ type Message struct {
 	// The raw message struct. This is the raw unmodified data, which means the actual message might
 	// be wrapped in DeviceSentMessage, EphemeralMessage or ViewOnceMessage.
 	RawMessage *waE2E.Message
+	
+	// The nodes struct. 
+	AdditionalNodes []*waBinary.Node
 }
 
 type FBMessage struct {
