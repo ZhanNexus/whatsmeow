@@ -314,7 +314,7 @@ type Message struct {
 	RawMessage *waE2E.Message
 	
 	// The nodes struct. 
-	AdditionalNodes []*waBinary.Node
+	AdditionalNodes []waBinary.Node
 }
 
 type FBMessage struct {
