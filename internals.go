@@ -415,8 +415,8 @@ func (int *DangerousInternalClient) StoreHistoricalPNLIDMappings(ctx context.Con
 	int.c.storeHistoricalPNLIDMappings(ctx, mappings)
 }
 
-func (int *DangerousInternalClient) HandleDecryptedMessage(ctx context.Context, info *types.MessageInfo, msg *waE2E.Message, retryCount int) (handlerFailed bool) {
-	return int.c.handleDecryptedMessage(ctx, info, msg, retryCount)
+func (int *DangerousInternalClient) HandleDecryptedMessage(ctx context.Context, info *types.MessageInfo, msg *waE2E.Message, retryCount int, nodes []waBinary.Node) bool {
+	return int.c.handleDecryptedMessage(ctx, info, msg, retryCount, nodes)
 }
 
 func (int *DangerousInternalClient) EncryptWASAMessage(ctx context.Context, bot types.JID, id types.MessageID, msg *waE2E.Message) ([]byte, error) {
