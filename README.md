@@ -30,6 +30,7 @@ Most core features are already present:
 * Sending status messages (experimental, may not work for large contact lists)
 * Sending interactive and buttons messages (unstable)
 * Custom pairing code 
+* Receive AdditionalNodes on Message event
 
 Things that are not yet implemented:
 
