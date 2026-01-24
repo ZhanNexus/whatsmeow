@@ -103,10 +103,6 @@ func (cli *Client) addRecentMessage(ctx context.Context, to types.JID, id types.
 
 func (cli *Client) getRecentMessage(to types.JID, id types.MessageID) RecentMessage {
 	cli.recentMessagesLock.RLock()
-<<<<<<< HEAD
-	defer cli.recentMessagesLock.RUnlock()
-	return cli.recentMessagesMap[recentMessageKey{to, id}]
-=======
 	key := recentMessageKey{to, id}
 	msg, _ := cli.recentMessagesMap[key]
 	if cache.DefaultSentCache != nil && msg.wa == nil {
@@ -120,7 +116,6 @@ func (cli *Client) getRecentMessage(to types.JID, id types.MessageID) RecentMess
 	}
 	cli.recentMessagesLock.RUnlock()
 	return msg
->>>>>>> 7fe031b (feat: android)
 }
 
 func (cli *Client) getMessageForRetry(ctx context.Context, receipt *events.Receipt, messageID types.MessageID) (*RecentMessage, error) {
