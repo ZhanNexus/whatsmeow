@@ -242,6 +242,38 @@ func newStarMutation(targetJID, senderJID string, messageID types.MessageID, fro
 	}
 }
 
+
+// BuildClearChat builds an app state patch for clearing chat.
+// Thanks to @github.com/tovmeod!! Source : https://github.com/tovmeod/neonize/commit/b10e164ee2f5cdc00291ee608d69c3c6e54278d1
+func BuildClearChat(target types.JID, lastMessageTimestamp time.Time, lastMessageKey *waCommon.MessageKey) PatchInfo {
+	if lastMessageTimestamp.IsZero() {
+		lastMessageTimestamp = time.Now()
+	}
+	action := &waSyncAction.ClearChatAction{
+		MessageRange: &waSyncAction.SyncActionMessageRange{
+			LastMessageTimestamp: proto.Int64(lastMessageTimestamp.Unix()),
+		},
+	}
+	if lastMessageKey != nil {
+		action.MessageRange.Messages = []*waSyncAction.SyncActionMessage{{
+			Key:       lastMessageKey,
+			Timestamp: proto.Int64(lastMessageTimestamp.Unix()),
+		}}
+	}
+
+	return PatchInfo{
+		Type: WAPatchRegular,
+		Mutations: []MutationInfo{{
+			Index:   []string{IndexClearChat, target.String()},
+			Version: 6,
+			Value: &waSyncAction.SyncActionValue{
+				ClearChatAction: action,
+			},
+		}},
+	}
+}
+
+
 // BuildStar builds an app state patch for starring or unstarring a message.
 func BuildStar(target, sender types.JID, messageID types.MessageID, fromMe, starred bool) PatchInfo {
 	isFromMe := "0"
