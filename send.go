@@ -385,7 +385,7 @@ func (cli *Client) SendMessage(ctx context.Context, to types.JID, message *waE2E
 
 	// Peer message retries aren't implemented yet
 	if !req.Peer || len(req.TargetJID) > 0 {
-		cli.addRecentMessage(to, req.ID, message, nil)
+		cli.addRecentMessage(ctx, to, req.ID, message, nil)
 	}
 
 	if message.GetMessageContextInfo().GetMessageSecret() != nil {
